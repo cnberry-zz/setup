@@ -1,7 +1,10 @@
 #!/bin/bash
 
 # Require $SRC to be set for location of cscope.out
-if [ -z ${SRC+x} ]; then
+if [[ $1 == "." ]]; then
+	echo "Setting SRC to '$PWD'"
+	export SRC=$PWD
+elif [ -z ${SRC+x} ]; then
 	echo "ERROR: $SRC is not set"
 	exit
 else
@@ -13,12 +16,17 @@ cd /
 # For directoreis to be excluded, add -o -name <dir> inbetween first (). 
 # For file extension to be included, add -o -name "*.<ext>" inbetween second ()
 echo "Creating $SRC/cscope.files"
-find $SRC \( -name gen_lattice -o -name thridpary \) -prune -o \( -name "*.c" -o -name "*.h" -o -name "*.cpp" -o -name "*.cc" -o -name "*.hh" -o -name "*.v" -o -name "*.sv" \)  -print> $SRC/cscope.files
+find $SRC \( -name testing -o -name opt -o -name buildroot-cache -o -name output \) -prune -o \( -type f -name "Makefile" -o -name "Dockerfile" -o -name "*.c" -o -name "*.h" -o -name "*.cpp" -o -name "*.cc" -o -name "*.hh" -o -name "*.v" -o -name "*.sv" \) -type f -print> $SRC/cscope.files
+
+
 cd $SRC
 echo "Running cscope now..."
-cscope -b
+cscope -b -q -k
+
+# This only works if you source this script using . cs notation
 export CSCOPE_DB=$SRC/cscope.out
 
+echo "Done"
 #run ctags as well
 #echo "Running ctags now..."
 #/usr/bin/ctags -R --exclude=gen_lattice --exclude=thirdparty
